@@ -3,8 +3,8 @@ import { InternalHomePage } from '../../src/ui/pages/home/InternalHomePage';
 import { ExternalHomePage } from '../../src/ui/pages/home/ExternalHomePage';
 
 export const test = base.extend<{
-  internalHomePage;
-  externalHomePage;
+  internalHomePage: InternalHomePage;
+  externalHomePage: ExternalHomePage;
 }>({
   internalHomePage: async ({ page }, use) => {
     const homePage = new InternalHomePage(page);

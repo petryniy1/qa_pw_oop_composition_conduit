@@ -1,26 +1,44 @@
 import { test } from '../../_fixtures/fixtures';
-import { ViewArticlePage } from '../../../src/ui/pages/article/ViewArticlePage';
+import { ExternalHomePage } from '../../../src/ui/pages/home/ExternalHomePage';
 import { createArticle } from '../../../src/ui/actions/articles/createArticle';
 import { signUpUser } from '../../../src/ui/actions/auth/signUpUser';
+import {
+  waitForArticleInGlobalFeed,
+  assertArticleContent,
+} from '../../../src/common/interfaces/articlesInterface';
 
-test.use({ contextsNumber: 2, usersNumber: 2 });
+test.use({ contextsNumber: 2, usersNumber: 1 });
 
 test.beforeEach(async ({ pages, users, articleWithoutTags }) => {
   await signUpUser(pages[0], users[0], 1);
-  await signUpUser(pages[1], users[1], 2);
   await createArticle(pages[0], articleWithoutTags, 1);
 });
 
-test('View an article created by another user', async ({
-  articleWithoutTags,
-  pages,
-  users,
-}) => {
-  const viewArticlePage = new ViewArticlePage(pages[1], 2);
+test(
+  'Not logged in user can view the article created by other user ' +
+    'in the Global Feed section',
+  async ({ articleWithoutTags, pages, users }) => {
+    const homePage = new ExternalHomePage(pages[1]);
 
-  await viewArticlePage.open(articleWithoutTags.url);
+    await waitForArticleInGlobalFeed(pages[1], articleWithoutTags);
 
-  await viewArticlePage.assertArticleTitleIsVisible(articleWithoutTags.title);
-  await viewArticlePage.assertArticleTextIsVisible(articleWithoutTags.text);
-  await viewArticlePage.assertArticleAuthorNameIsVisible(users[0].username);
-});
+    await homePage.globalFeed.articleFeedItem.assertArticleAuthorIsVisible(
+      users[0].username,
+    );
+  },
+);
+
+test(
+  'Not logged in user can open the article page created by other user ' +
+    'from the Global Feed section',
+  async ({ articleWithoutTags, pages, users }) => {
+    const homePage = new ExternalHomePage(pages[1]);
+
+    await waitForArticleInGlobalFeed(pages[1], articleWithoutTags);
+    await homePage.globalFeed.articleFeedItem.openArticle(
+      articleWithoutTags.title,
+    );
+
+    await assertArticleContent(pages[1], articleWithoutTags, users[0]);
+  },
+);

@@ -1,16 +1,14 @@
+import { BaseArticleContentBlock } from './BaseArticleContentBlock';
 import { expect } from '../../../common/helpers/pw';
-import { BasePage } from '../BasePage';
 
-export class ViewArticlePage extends BasePage {
-  articleId;
-
+export class ArticleContentBlock extends BaseArticleContentBlock {
   constructor(page, userId = 0) {
     super(page, userId);
     this.articleTitleHeader = page.getByRole('heading');
   }
 
   authorLinkInArticleHeader(username) {
-    return this.page.getByRole('link', { username }).first();
+    return this.page.getByRole('link', { name: username }).first();
   }
 
   tagListItem(tagName) {
@@ -27,21 +25,23 @@ export class ViewArticlePage extends BasePage {
     await this.step(
       `Assert the article has correct author username`,
       async () => {
-        await expect(this.authorLinkInArticleHeader(username)).toBeVisible();
+        await expect
+          .soft(this.authorLinkInArticleHeader(username))
+          .toBeVisible();
       },
     );
   }
 
   async assertArticleTextIsVisible(text) {
     await this.step(`Assert the article has correct text`, async () => {
-      await expect(this.page.getByText(text)).toBeVisible();
+      await expect.soft(this.page.getByText(text)).toBeVisible();
     });
   }
 
   async assertArticleTagsAreVisible(tags) {
     await this.step(`Assert the article has correct tags`, async () => {
       for (let i = 0; i < tags.length; i++) {
-        await expect(this.tagListItem(tags[i])).toBeVisible();
+        await expect.soft(this.tagListItem(tags[i])).toBeVisible();
       }
     });
   }

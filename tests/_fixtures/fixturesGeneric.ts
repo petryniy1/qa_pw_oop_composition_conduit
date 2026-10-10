@@ -1,20 +1,25 @@
-import { test as base } from '@playwright/test';
+import { test as base, Page } from '@playwright/test';
 import { Logger } from '../../src/common/logger/Logger';
 import { generateNewUserData } from '../../src/common/testData/generateNewUserData';
 import * as allure from 'allure-js-commons';
 import { parseTestTreeHierarchy } from '../../src/common/helpers/allureHelpers';
 
-export const test = base.extend<{
-  usersNumber;
-  contextsNumber;
-  pages;
-  user;
-  users;
-  infoTestLog;
-  addAllureTestHierarchy;
-}, {
-  logger;
-}>({
+type User = ReturnType<typeof generateNewUserData>;
+
+export const test = base.extend<
+  {
+    usersNumber: number;
+    contextsNumber: number;
+    pages: Page[];
+    user: User;
+    users: User[];
+    infoTestLog: void;
+    addAllureTestHierarchy: void;
+  },
+  {
+    logger: Logger;
+  }
+>({
   usersNumber: [1, { option: true }],
   contextsNumber: [1, { option: true }],
   pages: async ({ browser, contextsNumber }, use) => {
@@ -28,7 +33,7 @@ export const test = base.extend<{
     await use(pages);
   },
   user: async ({ logger }, use) => {
-    const user = generateNewUserData(logger);
+    const user = generateNewUserData(logger as any);
 
     await use(user);
   },
@@ -36,7 +41,7 @@ export const test = base.extend<{
     const users = Array(usersNumber);
 
     for (let i = 0; i < usersNumber; i++) {
-      users[i] = generateNewUserData(logger);
+      users[i] = generateNewUserData(logger as any);
     }
 
     await use(users);
@@ -51,12 +56,13 @@ export const test = base.extend<{
   ],
   infoTestLog: [
     async ({ logger }, use, testInfo) => {
-      const indexOfTestSubfolderStart = testInfo.file.indexOf('/tests') + 7;
-      const fileName = testInfo.file.substring(indexOfTestSubfolderStart);
+      const normalizedFile = testInfo.file.replace(/\\/g, '/');
+      const indexOfTestSubfolderStart = normalizedFile.indexOf('/tests') + 7;
+      const fileName = normalizedFile.substring(indexOfTestSubfolderStart);
 
       logger.info(`Test started: ${fileName}`);
 
-      await use('infoTestLog');
+      await use();
 
       logger.info(`Test completed: ${fileName}`);
     },
@@ -77,7 +83,7 @@ export const test = base.extend<{
         await allure.subSuite(subSuite);
       }
 
-      await use('addAllureTestHierarhy');
+      await use();
     },
     { scope: 'test', auto: true },
   ],

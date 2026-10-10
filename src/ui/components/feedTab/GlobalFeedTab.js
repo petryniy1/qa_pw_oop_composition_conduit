@@ -1,5 +1,6 @@
-import { BaseComponent } from './BaseComponent';
-import { expect } from '../../common/helpers/pw';
+import { BaseComponent } from '../BaseComponent';
+import { expect } from '../../../common/helpers/pw';
+import { ArticleFeedItem } from './ArticleFeedItem';
 
 export class GlobalFeedTab extends BaseComponent {
   #globalFeedLink;
@@ -7,6 +8,7 @@ export class GlobalFeedTab extends BaseComponent {
   constructor(page, userId = 0) {
     super(page, userId);
     this.#globalFeedLink = this.page.getByText('Global Feed');
+    this.articleFeedItem = new ArticleFeedItem(this.page, userId);
   }
 
   async open() {
